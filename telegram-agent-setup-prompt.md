@@ -366,6 +366,89 @@ systemPrompt: `...Basis-Anweisungen...\n\n${botClaudeMd}`,
 
 **In der `CLAUDE.md` können relative Pfade verwendet werden** (`docs/MEMORY.md`, `docs/memory/...`) — der Code ersetzt sie automatisch durch absolute Pfade. Das macht die Datei lesbar und portabel.
 
+### Compacting-Schutz (Context Window Management)
+
+Wenn eine Session lange läuft (viele Nachrichten, viele Tool-Calls), füllt sich das Context Window (~200k Tokens). Das SDK komprimiert dann automatisch den Gesprächsverlauf zu einem kurzen Summary — der Agent verliert Details. Dagegen gibt es drei Verteidigungslinien:
+
+#### Linie 1: Proaktive Checkpoints (CLAUDE.md Anweisungen)
+
+In der Projekt-`CLAUDE.md` stehen explizite Anweisungen, wann der Agent Checkpoints in seine Memory-Dateien schreiben soll:
+
+```markdown
+### Checkpoints (Compacting-Schutz)
+
+**Wann Checkpoints schreiben (PFLICHT):**
+- Nach Abschluss eines komplexen Tasks
+- Wenn du den Hinweis [CHECKPOINT] im Prompt siehst
+- Vor dem Wechsel zu einem anderen Thema
+- Wenn der User eine wichtige Entscheidung trifft
+```
+
+Der Agent schreibt diese Checkpoints in `docs/memory/YYYY-MM-DD.md` — **bevor** es zum Compacting kommt.
+
+#### Linie 2: Automatischer Checkpoint-Reminder (Code-Level)
+
+Der Bot trackt pro Session, wie viele Nachrichten und Tool-Aufrufe stattgefunden haben. Nach einem konfigurierbaren Schwellenwert wird ein `[CHECKPOINT]`-Hinweis automatisch in den nächsten Prompt injiziert:
+
+```typescript
+// Schwellenwerte (anpassbar)
+const CHECKPOINT_TOOL_THRESHOLD = 15;   // Nach N Tool-Aufrufen
+const CHECKPOINT_MSG_THRESHOLD = 10;    // Nach N Nachrichten
+
+// Session-Tracking
+interface UserSession {
+  // ... bestehende Felder ...
+  messageCount: number;       // Nachrichten in aktueller Session
+  toolUseCount: number;       // Tool-Aufrufe in aktueller Session
+}
+
+// Bei jedem query(): Prüfen ob Checkpoint nötig
+if (toolUseCount >= CHECKPOINT_TOOL_THRESHOLD || messageCount >= CHECKPOINT_MSG_THRESHOLD) {
+  prompt = `[CHECKPOINT] Du hast bereits ${toolUseCount} Tool-Aufrufe und ${messageCount} Nachrichten in dieser Session. Schreibe jetzt einen Checkpoint in deine Memory-Datei bevor du diese Anfrage bearbeitest.\n\n${prompt}`;
+}
+```
+
+**Warum Code-Level statt nur Prompt-Anweisung?**
+Prompt-Anweisungen wie "schreib nach 15 Tool-Calls" sind vage — der Agent zählt nicht mit. Der Code zählt exakt und injiziert den Reminder zum richtigen Zeitpunkt. Der Agent sieht `[CHECKPOINT]` und weiß aus seiner CLAUDE.md, dass er jetzt schreiben muss.
+
+**Die Counter werden bei `/new` zurückgesetzt** (zusammen mit sessionId und totalCost).
+
+**Tool-Use-Tracking:** Jeder `tool_use`-Block im Streaming wird gezählt und über einen `onToolUseCount`-Callback an die Session zurückgemeldet. So zählt der Bot auch Tool-Calls innerhalb einer einzelnen Antwort (z.B. wenn der Agent 5 Dateien liest bevor er antwortet).
+
+#### Linie 3: Post-Compacting Recovery (CLAUDE.md Anweisungen)
+
+Falls trotzdem kompaktiert wird, enthält die CLAUDE.md Anweisungen zur Selbst-Erkennung und Wiederherstellung:
+
+```markdown
+### Nach Compacting — Kontext wiederherstellen
+
+**Wenn dein Gesprächsverlauf dünn oder lückenhaft wirkt:**
+1. SOFORT docs/memory/YYYY-MM-DD.md (heute + gestern) lesen
+2. docs/MEMORY.md lesen
+3. Erst DANN auf die Nachricht reagieren
+
+**Erkennungszeichen für Compacting:**
+- Der User bezieht sich auf etwas das du nicht im Verlauf siehst
+- Du hast nur einen kurzen Summary statt detaillierter Nachrichten
+- Details wie Dateinamen, Code-Snippets oder Entscheidungen fehlen
+```
+
+#### Zusammenspiel der drei Linien
+
+```
+Session läuft, Nachrichten häufen sich
+  ↓
+Linie 1: Agent schreibt proaktiv Checkpoints (CLAUDE.md Anweisung)
+  ↓
+Linie 2: Nach 15 Tool-Calls → [CHECKPOINT] wird injiziert → Agent schreibt
+  ↓
+Falls Compacting trotzdem passiert:
+  ↓
+Linie 3: Agent erkennt dünnen Kontext → liest Memory-Files → hat Details wieder ✅
+```
+
+**Ergebnis:** Selbst bei Marathon-Sessions gehen wichtige Informationen nicht verloren. Die Checkpoints fungieren als "Rettungspunkte" — der Agent kann seinen Kontext jederzeit aus den Memory-Files rekonstruieren.
+
 ### Telegram Streaming
 
 - Erste Antwort als neue Message senden
