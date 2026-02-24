@@ -1,0 +1,482 @@
+{
+  "tools": [
+    {
+      "name": "run_shell",
+      "description": "Execute any shell command on the host system. Full sudo access available. Use for system administration, file operations, package management, etc.",
+      "command": "{{command}}",
+      "parameters": {
+        "command": { "type": "string", "description": "Shell command to execute", "required": true }
+      },
+      "timeout": 60000
+    },
+    {
+      "name": "sudo_command",
+      "description": "Execute a command with sudo/root privileges. For system administration tasks like package installation, service management, file permissions, etc.",
+      "command": "sudo {{command}}",
+      "parameters": {
+        "command": { "type": "string", "description": "Command to run with sudo", "required": true }
+      },
+      "timeout": 60000
+    },
+    {
+      "name": "osascript",
+      "description": "Run an AppleScript command on macOS. Control applications, show dialogs, automate UI, manage windows, etc.",
+      "command": "osascript -e '{{script}}'",
+      "parameters": {
+        "script": { "type": "string", "description": "AppleScript code to execute", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "osascript_js",
+      "description": "Run JavaScript for Automation (JXA) on macOS. More powerful than AppleScript for complex automation.",
+      "command": "osascript -l JavaScript -e '{{script}}'",
+      "parameters": {
+        "script": { "type": "string", "description": "JXA JavaScript code to execute", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "cliclick_type",
+      "description": "Type text using cliclick keyboard automation. Types text as if on a physical keyboard.",
+      "command": "cliclick t:'{{text}}'",
+      "parameters": {
+        "text": { "type": "string", "description": "Text to type", "required": true }
+      },
+      "timeout": 10000
+    },
+    {
+      "name": "cliclick_click",
+      "description": "Click at screen coordinates using cliclick.",
+      "command": "cliclick c:{{x}},{{y}}",
+      "parameters": {
+        "x": { "type": "number", "description": "X coordinate", "required": true },
+        "y": { "type": "number", "description": "Y coordinate", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "cliclick_key",
+      "description": "Press a keyboard key/combo using cliclick. Examples: return, escape, tab, space, arrow-up/down/left/right, cmd+c, cmd+v, etc.",
+      "command": "cliclick kp:{{key}}",
+      "parameters": {
+        "key": { "type": "string", "description": "Key to press (e.g., return, escape, cmd+c)", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "email_list",
+      "description": "List recent emails using himalaya CLI. Shows inbox messages with sender, subject, and date.",
+      "command": "himalaya list --account {{account}} -s {{count}}",
+      "parameters": {
+        "account": { "type": "string", "description": "Email account name (e.g., icloud, gmail)" },
+        "count": { "type": "number", "description": "Number of emails to show (default: 10)" }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "email_read",
+      "description": "Read a specific email by ID using himalaya.",
+      "command": "himalaya read --account {{account}} {{id}}",
+      "parameters": {
+        "account": { "type": "string", "description": "Email account name", "required": true },
+        "id": { "type": "string", "description": "Email message ID", "required": true }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "email_send",
+      "description": "Send an email using himalaya. Composes and sends via configured SMTP.",
+      "command": "echo 'From: {{from}}\nTo: {{to}}\nSubject: {{subject}}\n\n{{body}}' | himalaya send --account {{account}}",
+      "parameters": {
+        "account": { "type": "string", "description": "Email account name", "required": true },
+        "from": { "type": "string", "description": "Sender email address", "required": true },
+        "to": { "type": "string", "description": "Recipient email address", "required": true },
+        "subject": { "type": "string", "description": "Email subject", "required": true },
+        "body": { "type": "string", "description": "Email body text", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "email_search",
+      "description": "Search emails by keyword using himalaya.",
+      "command": "himalaya search --account {{account}} '{{query}}'",
+      "parameters": {
+        "account": { "type": "string", "description": "Email account name", "required": true },
+        "query": { "type": "string", "description": "Search query", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "screenshot",
+      "description": "Take a screenshot of the current screen. Returns the path to the saved image.",
+      "command": "screencapture -x /tmp/screenshot_$(date +%s).png && echo /tmp/screenshot_$(date +%s).png",
+      "timeout": 5000
+    },
+    {
+      "name": "volume_set",
+      "description": "Set the system volume level (0-100) or mute/unmute.",
+      "command": "osascript -e 'set volume output volume {{level}}'",
+      "parameters": {
+        "level": { "type": "number", "description": "Volume level 0-100, or use osascript for mute/unmute", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "brightness_set",
+      "description": "Set display brightness (0.0-1.0).",
+      "command": "brightness {{level}}",
+      "parameters": {
+        "level": { "type": "string", "description": "Brightness level from 0.0 to 1.0", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "bluetooth_control",
+      "description": "Control Bluetooth: on, off, or status.",
+      "command": "blueutil -p {{state}}",
+      "parameters": {
+        "state": { "type": "string", "description": "1 for on, 0 for off, or use 'blueutil' for status", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "app_open",
+      "description": "Open a macOS application by name.",
+      "command": "open -a '{{app}}'",
+      "parameters": {
+        "app": { "type": "string", "description": "Application name (e.g., Safari, Finder, Terminal)", "required": true }
+      },
+      "timeout": 10000
+    },
+    {
+      "name": "app_quit",
+      "description": "Quit a macOS application by name.",
+      "command": "osascript -e 'tell application \"{{app}}\" to quit'",
+      "parameters": {
+        "app": { "type": "string", "description": "Application name to quit", "required": true }
+      },
+      "timeout": 10000
+    },
+    {
+      "name": "notify",
+      "description": "Show a macOS notification with title and message.",
+      "command": "osascript -e 'display notification \"{{message}}\" with title \"{{title}}\"'",
+      "parameters": {
+        "title": { "type": "string", "description": "Notification title", "required": true },
+        "message": { "type": "string", "description": "Notification body", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "say_text",
+      "description": "Use macOS text-to-speech to speak text aloud.",
+      "command": "say '{{text}}'",
+      "parameters": {
+        "text": { "type": "string", "description": "Text to speak aloud", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "pdf_to_text",
+      "description": "Extract text from a PDF file using pdftotext.",
+      "command": "pdftotext '{{input}}' -",
+      "parameters": {
+        "input": { "type": "string", "description": "Path to PDF file", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "pdf_info",
+      "description": "Get metadata and info about a PDF file.",
+      "command": "pdfinfo '{{input}}'",
+      "parameters": {
+        "input": { "type": "string", "description": "Path to PDF file", "required": true }
+      },
+      "timeout": 10000
+    },
+    {
+      "name": "pdf_merge",
+      "description": "Merge multiple PDF files into one using ghostscript.",
+      "command": "gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile='{{output}}' {{inputs}}",
+      "parameters": {
+        "inputs": { "type": "string", "description": "Space-separated paths to PDF files to merge", "required": true },
+        "output": { "type": "string", "description": "Output PDF path", "required": true }
+      },
+      "timeout": 60000
+    },
+    {
+      "name": "pdf_split",
+      "description": "Extract specific pages from a PDF. Uses ghostscript.",
+      "command": "gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dFirstPage={{first}} -dLastPage={{last}} -sOutputFile='{{output}}' '{{input}}'",
+      "parameters": {
+        "input": { "type": "string", "description": "Input PDF path", "required": true },
+        "output": { "type": "string", "description": "Output PDF path", "required": true },
+        "first": { "type": "number", "description": "First page number", "required": true },
+        "last": { "type": "number", "description": "Last page number", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "pdf_compress",
+      "description": "Compress a PDF file to reduce size.",
+      "command": "gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/{{quality}} -sOutputFile='{{output}}' '{{input}}'",
+      "parameters": {
+        "input": { "type": "string", "description": "Input PDF path", "required": true },
+        "output": { "type": "string", "description": "Output PDF path", "required": true },
+        "quality": { "type": "string", "description": "Quality: screen (low), ebook (medium), printer (high), prepress (best)" }
+      },
+      "timeout": 60000
+    },
+    {
+      "name": "pdf_to_images",
+      "description": "Convert PDF pages to images using pdftoppm.",
+      "command": "pdftoppm -png -r {{dpi}} '{{input}}' '{{output_prefix}}'",
+      "parameters": {
+        "input": { "type": "string", "description": "Input PDF path", "required": true },
+        "output_prefix": { "type": "string", "description": "Output file prefix (e.g., /tmp/page)", "required": true },
+        "dpi": { "type": "number", "description": "Resolution in DPI (default: 150)" }
+      },
+      "timeout": 60000
+    },
+    {
+      "name": "html_to_pdf",
+      "description": "Convert HTML file or URL to PDF using wkhtmltopdf or Playwright.",
+      "command": "wkhtmltopdf --page-size A4 --margin-top 20mm --margin-bottom 20mm --margin-left 15mm --margin-right 15mm '{{input}}' '{{output}}'",
+      "parameters": {
+        "input": { "type": "string", "description": "HTML file path or URL", "required": true },
+        "output": { "type": "string", "description": "Output PDF path", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "markdown_to_pdf",
+      "description": "Convert Markdown to PDF via pandoc.",
+      "command": "pandoc '{{input}}' -o '{{output}}' --pdf-engine=xelatex -V geometry:margin=2.5cm",
+      "parameters": {
+        "input": { "type": "string", "description": "Input Markdown file path", "required": true },
+        "output": { "type": "string", "description": "Output PDF path", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "web_fetch",
+      "description": "Fetch a webpage and extract readable text content.",
+      "command": "curl -sL '{{url}}' | python3 -c \"import sys; from html.parser import HTMLParser; \nclass P(HTMLParser):\n  def __init__(s): super().__init__(); s.t=[]; s.skip=0\n  def handle_starttag(s,tag,a): s.skip=tag in('script','style','head')\n  def handle_endtag(s,tag): s.skip=0\n  def handle_data(s,d):\n    if not s.skip: s.t.append(d.strip())\np=P(); p.feed(sys.stdin.read()); print('\\n'.join(l for l in p.t if l))\"",
+      "parameters": {
+        "url": { "type": "string", "description": "URL to fetch", "required": true }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "git_status",
+      "description": "Check git status of a repository.",
+      "command": "cd '{{path}}' && git status --short && echo '---' && git log --oneline -5",
+      "parameters": {
+        "path": { "type": "string", "description": "Path to git repository", "required": true }
+      },
+      "timeout": 10000
+    },
+    {
+      "name": "git_commit",
+      "description": "Stage all changes and commit with a message.",
+      "command": "cd '{{path}}' && git add -A && git commit -m '{{message}}'",
+      "parameters": {
+        "path": { "type": "string", "description": "Path to git repository", "required": true },
+        "message": { "type": "string", "description": "Commit message", "required": true }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "pm2_status",
+      "description": "Show PM2 process manager status for all running services.",
+      "command": "pm2 jlist",
+      "timeout": 10000
+    },
+    {
+      "name": "pm2_restart",
+      "description": "Restart a PM2 process by name or ID.",
+      "command": "pm2 restart {{process}}",
+      "parameters": {
+        "process": { "type": "string", "description": "PM2 process name or ID", "required": true }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "pm2_logs",
+      "description": "Show recent logs for a PM2 process.",
+      "command": "pm2 logs {{process}} --nostream --lines {{lines}}",
+      "parameters": {
+        "process": { "type": "string", "description": "PM2 process name or ID", "required": true },
+        "lines": { "type": "number", "description": "Number of log lines (default: 50)" }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "ssh_command",
+      "description": "Execute a command on a remote server via SSH.",
+      "command": "ssh {{host}} '{{command}}'",
+      "parameters": {
+        "host": { "type": "string", "description": "SSH host (user@host or configured alias)", "required": true },
+        "command": { "type": "string", "description": "Command to run on remote server", "required": true }
+      },
+      "timeout": 30000
+    },
+    {
+      "name": "system_info",
+      "description": "Get comprehensive system information (CPU, memory, disk, network).",
+      "command": "echo '=== CPU ===' && sysctl -n machdep.cpu.brand_string && echo '=== Memory ===' && vm_stat | head -5 && echo '=== Disk ===' && df -h / && echo '=== Network ===' && ifconfig en0 | grep 'inet ' && echo '=== Uptime ===' && uptime",
+      "timeout": 10000
+    },
+    {
+      "name": "find_files",
+      "description": "Search for files by name pattern.",
+      "command": "find '{{path}}' -name '{{pattern}}' -maxdepth {{depth}} 2>/dev/null | head -50",
+      "parameters": {
+        "path": { "type": "string", "description": "Directory to search in", "required": true },
+        "pattern": { "type": "string", "description": "File name pattern (glob, e.g., *.pdf)", "required": true },
+        "depth": { "type": "number", "description": "Max directory depth (default: 5)" }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "clipboard_get",
+      "description": "Get current clipboard content.",
+      "command": "pbpaste",
+      "timeout": 5000
+    },
+    {
+      "name": "clipboard_set",
+      "description": "Set clipboard content.",
+      "command": "echo -n '{{text}}' | pbcopy && echo 'Copied to clipboard'",
+      "parameters": {
+        "text": { "type": "string", "description": "Text to copy to clipboard", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "calendar_today",
+      "description": "Show today's calendar events using icalBuddy.",
+      "command": "icalBuddy -f eventsToday",
+      "timeout": 10000
+    },
+    {
+      "name": "calendar_upcoming",
+      "description": "Show upcoming calendar events.",
+      "command": "icalBuddy -f eventsToday+{{days}}",
+      "parameters": {
+        "days": { "type": "number", "description": "Number of days to look ahead (default: 7)" }
+      },
+      "timeout": 10000
+    },
+    {
+      "name": "image_convert",
+      "description": "Convert image format using sips (macOS built-in).",
+      "command": "sips -s format {{format}} '{{input}}' --out '{{output}}'",
+      "parameters": {
+        "input": { "type": "string", "description": "Input image path", "required": true },
+        "output": { "type": "string", "description": "Output image path", "required": true },
+        "format": { "type": "string", "description": "Output format: jpeg, png, tiff, gif, bmp", "required": true }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "image_resize",
+      "description": "Resize an image using sips.",
+      "command": "sips --resampleWidth {{width}} '{{input}}' --out '{{output}}'",
+      "parameters": {
+        "input": { "type": "string", "description": "Input image path", "required": true },
+        "output": { "type": "string", "description": "Output image path", "required": true },
+        "width": { "type": "number", "description": "Target width in pixels", "required": true }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "ffmpeg_convert",
+      "description": "Convert media files using ffmpeg (audio/video).",
+      "command": "ffmpeg -i '{{input}}' {{options}} '{{output}}' -y 2>&1 | tail -5",
+      "parameters": {
+        "input": { "type": "string", "description": "Input file path", "required": true },
+        "output": { "type": "string", "description": "Output file path", "required": true },
+        "options": { "type": "string", "description": "ffmpeg options (e.g., -c:v libx264 -crf 23)" }
+      },
+      "timeout": 120000
+    },
+    {
+      "name": "whisper_transcribe",
+      "description": "Transcribe audio to text using Whisper (via Groq API or local).",
+      "command": "curl -s https://api.groq.com/openai/v1/audio/transcriptions -H 'Authorization: Bearer '\"$GROQ_API_KEY\" -F file=@'{{input}}' -F model=whisper-large-v3-turbo -F language={{language}} | python3 -c 'import sys,json; print(json.load(sys.stdin).get(\"text\",\"Error\"))'",
+      "parameters": {
+        "input": { "type": "string", "description": "Audio file path", "required": true },
+        "language": { "type": "string", "description": "Language code (e.g., de, en)" }
+      },
+      "timeout": 60000
+    },
+    {
+      "name": "process_list",
+      "description": "List running processes, optionally filtered.",
+      "command": "ps aux | grep -i '{{filter}}' | grep -v grep | head -20",
+      "parameters": {
+        "filter": { "type": "string", "description": "Process name filter", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "kill_process",
+      "description": "Kill a process by PID or name.",
+      "command": "pkill -f '{{name}}'",
+      "parameters": {
+        "name": { "type": "string", "description": "Process name or pattern to kill", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "docker_ps",
+      "description": "List running Docker containers.",
+      "command": "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'",
+      "timeout": 10000
+    },
+    {
+      "name": "network_check",
+      "description": "Check network connectivity and DNS resolution.",
+      "command": "echo '=== Ping ===' && ping -c 2 {{host}} && echo '=== DNS ===' && nslookup {{host}}",
+      "parameters": {
+        "host": { "type": "string", "description": "Host to check", "required": true }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "wifi_status",
+      "description": "Show current WiFi status and connected network.",
+      "command": "networksetup -getairportnetwork en0 && echo '---' && ipconfig getifaddr en0",
+      "timeout": 5000
+    },
+    {
+      "name": "disk_usage",
+      "description": "Show disk usage for a directory.",
+      "command": "du -sh '{{path}}'/* 2>/dev/null | sort -rh | head -20",
+      "parameters": {
+        "path": { "type": "string", "description": "Directory path", "required": true }
+      },
+      "timeout": 15000
+    },
+    {
+      "name": "open_url",
+      "description": "Open a URL in the default browser.",
+      "command": "open '{{url}}'",
+      "parameters": {
+        "url": { "type": "string", "description": "URL to open", "required": true }
+      },
+      "timeout": 5000
+    },
+    {
+      "name": "open_file",
+      "description": "Open a file with the default application.",
+      "command": "open '{{path}}'",
+      "parameters": {
+        "path": { "type": "string", "description": "File path to open", "required": true }
+      },
+      "timeout": 5000
+    }
+  ]
+}
